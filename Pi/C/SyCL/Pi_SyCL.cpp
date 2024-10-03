@@ -9,9 +9,10 @@
 // python3 $DPCPP_HOME/llvm/buildbot/compile.py
 // python3 $DPCPP_HOME/llvm/buildbot/check.py
 // Use...
+// export DPCPP_HOME=$PWD/sycl_workspace
 // export PATH=$DPCPP_HOME/llvm/build/bin:$PATH
 // export LD_LIBRARY_PATH=$DPCPP_HOME/llvm/build/lib:$LD_LIBRARY_PATH
-// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DLONG -DTIME  Pi_SyCL.cpp -o Pi_SyCL_FP32_MWC -lm
+// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DFP32 -DMWC -DLONG -DTIME  Pi_SyCL.cpp -o Pi_SyCL_FP32_MWC -lm
 // ./Pi_SyCL_FP32_MWC 1000000000 1024
 
 #include <iostream>
