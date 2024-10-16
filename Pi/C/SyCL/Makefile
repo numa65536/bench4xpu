@@ -8,7 +8,7 @@ MARSAGLIA=SHR3 CONG MWC KISS
 
 CC=clang++
 CFLAGS=-fsycl -fsycl-targets=nvptx64-nvidia-cuda
-LIBRARY=-lm
+LIBRARY=
 
 all: $(SOURCE)
 

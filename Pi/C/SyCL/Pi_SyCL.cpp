@@ -12,12 +12,11 @@
 // export DPCPP_HOME=$PWD/sycl_workspace
 // export PATH=$DPCPP_HOME/llvm/build/bin:$PATH
 // export LD_LIBRARY_PATH=$DPCPP_HOME/llvm/build/lib:$LD_LIBRARY_PATH
-// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DFP32 -DMWC -DLONG -DTIME  Pi_SyCL.cpp -o Pi_SyCL_FP32_MWC -lm
+// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DTFP32 -DTMWC -DLONG -DTIME  Pi_SyCL.cpp -o Pi_SyCL_FP32_MWC
 // ./Pi_SyCL_FP32_MWC 1000000000 1024
 
 #include <iostream>
 #include <sycl/sycl.hpp>
-#include <math.h>
 #include <sys/time.h>
 
 // Marsaglia RNG very simple implementation
@@ -43,6 +42,7 @@
 #define LENGTH int
 #endif
 
+using namespace sycl;
 LENGTH MainLoopGlobal(LENGTH iterations,unsigned int seed_w,unsigned int seed_z)
 {
 #if defined TCONG
@@ -133,6 +133,7 @@ LENGTH MainLoopGlobal(LENGTH iterations,unsigned int seed_w,unsigned int seed_z)
    return(total);
 }
 
+using namespace sycl;
 LENGTH splitter(LENGTH iterations,unsigned int seed_w,unsigned int seed_z,unsigned int ParallelRate)
 {
   LENGTH *inside,insides=0;
