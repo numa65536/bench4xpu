@@ -11,23 +11,24 @@
 // Use...
 // export PATH=$DPCPP_HOME/llvm/build/bin:$PATH
 // export LD_LIBRARY_PATH=$DPCPP_HOME/llvm/build/lib:$LD_LIBRARY_PATH
-// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DCHECK MySteps_sycl.cpp -o MySteps_sycl.exe -lm
-// ./MySteps_sycl.exe 1024 10
+// clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DNOCHECK MySteps_6_SyCL.cpp -o MySteps_6_SyCL
+// ./MySteps_6_SyCL 1024 10
 
 #include <iostream>
 #include <sycl/sycl.hpp>
-#include <math.h>
 #include <sys/time.h>
 
 #define MYFLOAT float
 
 #define ERROR 1e-5
 
+using namespace sycl;
 MYFLOAT MySillyFunction(MYFLOAT x)
 {
     return(pow(sqrt(log(exp(atanh(tanh(asinh(sinh(acosh(cosh(atan(tan(asin(sin(acos(cos(x))))))))))))))),2));
 }
 
+using namespace sycl;
 void MySillySum(MYFLOAT *res, MYFLOAT *a, MYFLOAT *b,int calls, int size)
 {
   for (uint i=0; i<size;i++) 
@@ -45,7 +46,7 @@ void MySillySum(MYFLOAT *res, MYFLOAT *a, MYFLOAT *b,int calls, int size)
     }
 }
 
-using namespace std;
+using namespace sycl;
 int main(int argc, char *argv[]) {
   MYFLOAT *a,*b,*res,*resacc;
   int size=1024;
