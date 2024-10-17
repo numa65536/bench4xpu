@@ -1,6 +1,6 @@
 // To create and activate compete SyCL environment, Debian Bookworm
 // Create...
-// export DPCPP_HOME=$PWD/sycl_workspace
+// export DPCPP_HOME=<MyRootInstall>/sycl_workspace
 // mv $DPCPP_HOME ${DPCPP_HOME}-$(date "+%Y%m%d-%H%M")
 // mkdir $DPCPP_HOME
 // cd $DPCPP_HOME
@@ -9,6 +9,7 @@
 // python3 $DPCPP_HOME/llvm/buildbot/compile.py
 // python3 $DPCPP_HOME/llvm/buildbot/check.py
 // Use...
+// export DPCPP_HOME=<MyRootInstall>/sycl_workspace
 // export PATH=$DPCPP_HOME/llvm/build/bin:$PATH
 // export LD_LIBRARY_PATH=$DPCPP_HOME/llvm/build/lib:$LD_LIBRARY_PATH
 // clang++ -fsycl -fsycl-targets=nvptx64-nvidia-cuda -DNOCHECK MySteps_6_SyCL.cpp -o MySteps_6_SyCL
