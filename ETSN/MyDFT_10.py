@@ -280,11 +280,11 @@ if __name__=='__main__':
     SIZE=1024
     Device=0
     NaiveMethod=False
-    NumpyFFTMethod=True
-    OpenCLFFTMethod=True
+    NumpyFFTMethod=False
+    OpenCLFFTMethod=False
     NumpyMethod=False
     NumbaMethod=False
-    OpenCLMethod=False
+    OpenCLMethod=True
     CUDAMethod=False
     Threads=1
     Verbose=True
