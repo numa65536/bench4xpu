@@ -1,5 +1,5 @@
 /* Simple Discrete Fourier Transform implemented in C and OpenMP/C */
-/* compilation with : gcc -fopenmp -O3 -o MyDFT MyDFT.c -lm -lgomp */
+/* compilation with : gcc -O3 -o MyDFT MyDFT.c -lm */
 
 #include <math.h>
 #include <stdio.h>
@@ -24,24 +24,6 @@ void MyDFT(MYFLOAT *A, MYFLOAT *B, MYFLOAT *a, MYFLOAT *b,int size)
       B[j]=Bt;
     }
 }
-
-void MyDFTOMP(MYFLOAT *A, MYFLOAT *B, MYFLOAT *a, MYFLOAT *b,int size)
-{
-  #pragma omp parallel for
-  for (uint j=0;j<size;j++)
-    {
-      MYFLOAT At=0.,Bt=0.;
-      for (uint i=0; i<size;i++) 
-	{
-	  At+=a[i]*cos(2.*PI*(MYFLOAT)(j*i)/(MYFLOAT)size)+b[i]*sin(2.*PI*(MYFLOAT)(j*i)/(MYFLOAT)size);
-	  Bt+=-a[i]*sin(2.*PI*(MYFLOAT)(j*i)/(MYFLOAT)size)+b[i]*cos(2.*PI*(MYFLOAT)(j*i)/(MYFLOAT)size);
-	}
-      A[j]=At;
-      B[j]=Bt;
-    }
-}
-
-
 
 int main(int argc,char *argv[])
 {
@@ -76,13 +58,6 @@ int main(int argc,char *argv[])
   MYFLOAT elapsed=(MYFLOAT)((tv2.tv_sec-tv1.tv_sec) * 1000000L +
 			    (tv2.tv_usec-tv1.tv_usec))/1000000;
 
-  gettimeofday(&tv1, NULL);
-  MyDFTOMP(A,B,a,b,size);
-  gettimeofday(&tv2, NULL);
-
-  MYFLOAT elapsedOMP=(MYFLOAT)((tv2.tv_sec-tv1.tv_sec) * 1000000L +
-			    (tv2.tv_usec-tv1.tv_usec))/1000000;
-
   /* printf("A=["); */
   /* for (int i=0;i<size;i++) */
   /*   { */
@@ -101,10 +76,8 @@ int main(int argc,char *argv[])
   printf("B[0]=%.3f B[%i]=%.3f\n\n",B[0],size,B[size-1]);
 
   printf("Elapsed Time: %.3f\n",elapsed);
-  printf("OMP Elapsed Time: %.3f\n",elapsedOMP);
 
   printf("NaiveRate: %.i\n",(int)((float)size/elapsed));
-  printf("OMPRate: %.i\n",(int)((float)size/elapsedOMP));
   
   free(a);
   free(b);
