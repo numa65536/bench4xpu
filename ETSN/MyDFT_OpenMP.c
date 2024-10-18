@@ -91,8 +91,8 @@ int main(int argc,char *argv[])
   printf("\nA[0]=%.3f A[%i]=%.3f\n",A[0],size-1,A[size-1]);
   printf("B[0]=%.3f B[%i]=%.3f\n\n",B[0],size-1,B[size-1]);
 
-  printf("OpenMPElapsed Time: %.3f\n",elapsedOpenMP);
-  printf("OpenMPRate: %.i\n",(int)((float)size/elapsedOpenMP));
+  printf("OpenMPElapsed: %.3f\n",elapsedOMP);
+  printf("OpenMPRate: %.i\n",(int)((float)size/elapsedOMP));
   
   free(a);
   free(b);
