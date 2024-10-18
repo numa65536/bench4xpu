@@ -1,4 +1,4 @@
-/* Simple Discrete Fourier Transform implemented in C and OpenMP/C */
+/* Naive Discrete Fourier Transform implemented in C */
 /* compilation with : gcc -O3 -o MyDFT MyDFT.c -lm */
 
 #include <math.h>
@@ -35,7 +35,7 @@ int main(int argc,char *argv[])
     size=(int)atoll(argv[1]);
   }
   else {
-    printf("\n\tPi : Estimate DFT\n\n\t\t#1 : size (default 1024)\n\n");
+    printf("\n\tEstimate DFT\n\n\t\t#1 : size (default 1024)\n\n");
   }
 
   a=(float*)malloc(size*sizeof(MYFLOAT));
@@ -48,7 +48,7 @@ int main(int argc,char *argv[])
       a[i]=1.;
       b[i]=1.;
       A[i]=0.;
-      A[i]=0.;
+      B[i]=0.;
     }
 
   gettimeofday(&tv1, NULL);
@@ -72,10 +72,10 @@ int main(int argc,char *argv[])
   /*   } */
   /* printf(" ]\n\n"); */
 
-  printf("\nA[0]=%.3f A[%i]=%.3f\n",A[0],size,A[size-1]);
-  printf("B[0]=%.3f B[%i]=%.3f\n\n",B[0],size,B[size-1]);
+  printf("\nA[0]=%.3f A[%i]=%.3f\n",A[0],size-1,A[size-1]);
+  printf("B[0]=%.3f B[%i]=%.3f\n\n",B[0],size-1,B[size-1]);
 
-  printf("Elapsed Time: %.3f\n",elapsed);
+  printf("NaiveElapsed: %.3f\n",elapsed);
 
   printf("NaiveRate: %.i\n",(int)((float)size/elapsed));
   
