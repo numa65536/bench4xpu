@@ -1,3 +1,5 @@
+// Simple addition of two vectors where Mylq function is applied 
+// Emmanuel QUEMENER <emmanuel.quemener@gmail.com>
 // To create and activate compete SyCL environment, Debian Bookworm
 // Create...
 // export DPCPP_HOME=<MyRootInstall>/sycl_workspace
