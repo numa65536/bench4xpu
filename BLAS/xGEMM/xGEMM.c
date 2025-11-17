@@ -18,6 +18,11 @@
 /* Precise here to avoid new specific bench function */
 int MyPlatform;
 int MyDevice;
+#elif CLBLAST
+#include <clblast_c.h>
+/* Precise here to avoid new specific bench function */
+int MyPlatform;
+int MyDevice;
 #elif CUBLAS
 #include <cublas.h>
 #define CUBLAS_WRAPPER_ERROR_NOERR      0
@@ -41,6 +46,14 @@ int MyDevice;
 #endif
 
 #ifdef CLBLAS
+
+#ifdef FP64
+#define LENGTH cl_double
+#else
+#define LENGTH cl_float
+#endif
+
+#elif CLBLAST
 
 #ifdef FP64
 #define LENGTH cl_double
@@ -375,7 +388,145 @@ int bench(int dim,int RUNS)
   /* Release OpenCL working objects. */
   clReleaseCommandQueue( queue );
   clReleaseContext( ctx );
+    
+  /* Compute with CLBLAST library  */
   
+#elif CLBLAST
+
+  cl_uint platformCount;
+  cl_platform_id* platforms;
+  cl_uint deviceCount;
+  cl_device_id* devices;
+
+  cl_int err,errA,errB,errC,errD;
+  cl_context_properties props[3] = { CL_CONTEXT_PLATFORM, 0, 0 };
+  cl_context ctx = 0;
+  cl_command_queue queue = 0;
+  cl_mem bufA, bufB, bufC, bufD;
+  cl_event event = NULL;
+
+  char* value;
+  size_t valueSize;
+
+  // tv3 Put on Device: Allocate & Write buffer
+  // tv4 Compute
+  struct timeval tv3,tv4;
+
+  printf("Using CLBLAST: %i iterations for %ix%i matrix on (%d,%d)\n",
+	 RUNS,dim,dim,MyPlatform,MyDevice);
+
+  /* Setup OpenCL environment. */
+  /* - get all platforms and select MyPlatform */
+  /* - get all devices from MyPlatform and select MyDevice */
+
+  // Get all platforms
+  err = clGetPlatformIDs(0, NULL, &platformCount);
+  platforms = (cl_platform_id*) malloc(sizeof(cl_platform_id) * platformCount);
+  err = clGetPlatformIDs(platformCount, platforms, NULL);
+
+  // Get Device defined
+  err = clGetDeviceIDs(platforms[MyPlatform], CL_DEVICE_TYPE_ALL, 0, NULL, &deviceCount);
+  devices = (cl_device_id*) malloc(sizeof(cl_device_id) * deviceCount);
+  err = clGetDeviceIDs(platforms[MyPlatform], CL_DEVICE_TYPE_ALL, deviceCount, devices, NULL);  
+
+  // print device name
+  err = clGetDeviceInfo(devices[MyDevice], CL_DEVICE_NAME, 0, NULL, &valueSize);
+  value = (char*) malloc(valueSize);
+  err = clGetDeviceInfo(devices[MyDevice], CL_DEVICE_NAME, valueSize, value, NULL);
+  printf("Device (%d,%d): %s\n",MyPlatform,MyDevice, value);
+  free(value);
+
+  props[1] = (cl_context_properties)platforms[MyPlatform];
+
+  /* Initialize Context */
+  ctx = clCreateContext( props, 1, &devices[MyDevice], NULL, NULL, &err );
+  queue = clCreateCommandQueue( ctx, devices[MyDevice], 0, &err );
+
+  /* Setup clBLAST */
+  /* err = clblasSetup( ); */
+
+  /* Prepare OpenCL memory objects and place matrices inside them. */
+  bufA = clCreateBuffer(ctx,CL_MEM_READ_ONLY,dim*dim*sizeof(*A),NULL,&errA );
+  bufB = clCreateBuffer(ctx,CL_MEM_READ_ONLY,dim*dim*sizeof(*B),NULL,&errB );
+  bufC = clCreateBuffer(ctx,CL_MEM_READ_WRITE,dim*dim*sizeof(*C),NULL,&errC );
+  bufD = clCreateBuffer(ctx,CL_MEM_READ_WRITE,dim*dim*sizeof(*D),NULL,&errD );
+
+  errA = clEnqueueWriteBuffer( queue,bufA,CL_TRUE,0,
+			       dim*dim*sizeof(*A),A,0,NULL,NULL );
+  errB = clEnqueueWriteBuffer( queue, bufB, CL_TRUE,0,
+			       dim*dim*sizeof(*B),B,0,NULL,NULL );
+  errC = clEnqueueWriteBuffer( queue, bufC, CL_TRUE,0,
+  			       dim*dim*sizeof(*C),C,0,NULL,NULL );
+  errD = clEnqueueWriteBuffer( queue, bufD, CL_TRUE,0,
+  			       dim*dim*sizeof(*D),D,0,NULL,NULL );
+  
+  /* Get third timer after memory operation */
+  gettimeofday(&tv3, &tz);
+
+#ifdef FP64
+
+  for (i=0;i<RUNS;i++)
+    {
+      err = CLBlastDgemm( CLBlastLayoutRowMajor,CLBlastTransposeNo,CLBlastTransposeNo, 
+			  dim,dim,dim,alpha,bufA,0,dim,bufB,0,dim,beta,
+			  bufC,0,dim,&queue,&event );
+
+      err = CLBlastDgemm( CLBlastLayoutRowMajor,CLBlastTransposeYes,CLBlastTransposeYes, 
+			  dim,dim,dim,alpha,bufB,0,dim,bufA,0,dim,beta,
+			  bufD,0,dim,&queue,&event );
+
+    }
+  
+  if (err != CL_SUCCESS) {
+    printf("CLBlastDgemm() failed with %d\n", err);
+  }
+
+#else
+
+  for (i=0;i<RUNS;i++)
+    {
+
+      err = CLBlastSgemm( CLBlastLayoutRowMajor,CLBlastTransposeNo,CLBlastTransposeNo, 
+			  dim,dim,dim,alpha,bufA,0,dim,bufB,0,dim,beta,
+			  bufC,0,dim,&queue,&event );
+
+      err = CLBlastSgemm( CLBlastLayoutRowMajor,CLBlastTransposeYes,CLBlastTransposeYes, 
+			  dim,dim,dim,alpha,bufB,0,dim,bufA,0,dim,beta,
+			  bufD,0,dim,&queue,&event );
+    }
+  
+  if (err != CL_SUCCESS) {
+    printf("CLBlastSgemm() failed with %d\n", err);
+  }
+
+#endif
+
+  /* Wait for calculations to be finished. */
+  err = clWaitForEvents( 1, &event );
+  
+  /* Get fourth timer after memory free */
+  gettimeofday(&tv4, &tz);
+
+  /* Fetch results of calculations from GPU memory. */
+  errC = clEnqueueReadBuffer( queue,bufC,CL_TRUE,0,dim*dim * sizeof(*C),
+			     C,0,NULL,NULL );
+
+  /* Fetch results of calculations from GPU memory. */
+  errD = clEnqueueReadBuffer( queue,bufD,CL_TRUE,0,dim*dim*sizeof(*D),
+			     D,0,NULL,NULL );
+
+  /* Release OpenCL memory objects. */
+  clReleaseMemObject( bufD );
+  clReleaseMemObject( bufC );
+  clReleaseMemObject( bufB );
+  clReleaseMemObject( bufA );
+
+  /* Finalize work with clBLAS */
+  /* clblasTeardown( ); */
+
+  /* Release OpenCL working objects. */
+  clReleaseCommandQueue( queue );
+  clReleaseContext( ctx );
 
   /* Compute with CuBLAS library  */
 #elif CUBLAS

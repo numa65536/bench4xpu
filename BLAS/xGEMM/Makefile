@@ -10,6 +10,9 @@ LDFLAGS=-lm
 CLBLASINC=/usr/include
 CLBLASLIB=/usr/lib/x86_64-linux-gnu
 
+CLBLASTINC=/usr/include
+CLBLASTLIB=/usr/lib/x86_64-linux-gnu
+
 CUDALIB?=/usr/lib/x86_64-linux-gnu/
 CUDAINC?=/usr/include
 CUDASRC?=/usr/share/doc/nvidia-cuda-toolkit/examples/libcublas
@@ -26,7 +29,7 @@ ACMLINC=$(ACML)/gfortran64_mp/include
 ACMLLIB=$(ACML)/gfortran64_mp/lib
 
 #EXECUTABLE=gsl cblas fblas openblas clblas cublas acml thunking
-EXECUTABLE=gsl cblas fblas openblas clblas cublas thunking
+EXECUTABLE=gsl fblas openblas clblas cublas thunking clblast
 
 # FORMAT define the precision of Floating Point numbers
 # FP32 for simple of 32 bits size
@@ -102,6 +105,16 @@ clblas: $(SOURCE)
 	$(CC) -I$(CLBLASINC) -L$(CLBLASLIB) $(CFLAGS) -DFP64 \
 		-DCLBLAS $(LDFLAGS) \
 		$(DIRECTIVES) $(SOURCE) -lclBLAS -lOpenCL -o $(SOURCE:.c=)_DP_$@
+
+clblast: $(SOURCE)
+
+	$(CC) -I$(CLBLASINC) -L$(CLBLASLIB) $(CFLAGS) -DFP32 \
+		-DCLBLAST $(LDFLAGS) \
+		$(DIRECTIVES) $(SOURCE) -lclblast -lOpenCL -o $(SOURCE:.c=)_SP_$@
+
+	$(CC) -I$(CLBLASINC) -L$(CLBLASLIB) $(CFLAGS) -DFP64 \
+		-DCLBLAST $(LDFLAGS) \
+		$(DIRECTIVES) $(SOURCE) -lclblast -lOpenCL -o $(SOURCE:.c=)_DP_$@
 
 cublas: $(SOURCE)
 
